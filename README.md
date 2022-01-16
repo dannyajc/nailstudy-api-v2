@@ -1,1 +1,0 @@
-# nailstudy-api-v2
