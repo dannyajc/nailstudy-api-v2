@@ -9,7 +9,6 @@ class User {
     email: String;
     isAdmin: boolean;
     courses?: UserCourse[];
-    //TODO: Following courses (contains license)
 
     constructor(firstName: String, lastName: String,
         phone: String,

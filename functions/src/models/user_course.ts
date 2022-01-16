@@ -16,7 +16,7 @@ class UserCourse {
     constructor(courseId: String,
         startedAt: Date,
         expiryDate: Date,
-        currentLessonNumber: number, // if lesson number is higher than previous lesson, it means that the previous lesson (practice) has been approved
+        currentLessonNumber: number,
         currentSubjectNumber: number,
         finished: boolean = false,
         licenseCode: String,
