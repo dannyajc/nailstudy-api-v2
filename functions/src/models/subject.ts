@@ -1,11 +1,11 @@
 class Subject {
-    title: String;
-    description: String;
+    title: string;
+    description: string;
     subjectNumber: number;
     paragraphs: Paragraph[];
 
-    constructor(title: String,
-        description: String,
+    constructor(title: string,
+        description: string,
         subjectNumber: number,
         paragraphs: Paragraph[]) {
         this.title = title;

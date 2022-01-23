@@ -1,11 +1,11 @@
 class Paragraph {
-    title: String;
-    description: String;
-    images: String[]; // urls
+    title: string;
+    description: string;
+    images: string[]; // urls
 
-    constructor(title: String,
-        description: String,
-        images: String[]) {
+    constructor(title: string,
+        description: string,
+        images: string[]) {
         this.title = title;
         this.description = description;
         this.images = images;

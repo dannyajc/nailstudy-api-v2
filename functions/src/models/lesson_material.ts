@@ -1,14 +1,14 @@
 class LessonMaterial {
     materialType: MaterialType;
-    name: String;
-    description: String;
-    image: String;
+    name: string;
+    description: string;
+    image: string;
     subjects: Subject[];
 
     constructor(materialType: MaterialType,
-        name: String,
-        description: String,
-        image: String,
+        name: string,
+        description: string,
+        image: string,
         subjects: Subject[]) {
         this.materialType = materialType;
         this.name = name;

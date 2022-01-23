@@ -1,11 +1,11 @@
 class Lesson {
-    name: String;
+    name: string;
     lessonNumber: number;
     theory: LessonMaterial;
     practice: LessonMaterial;
-    image?: String;
+    image?: string;
 
-    constructor(name: String, lessonNumber: number, theory: LessonMaterial, practice: LessonMaterial, image: String) {
+    constructor(name: string, lessonNumber: number, theory: LessonMaterial, practice: LessonMaterial, image: string) {
         this.name = name;
         this.lessonNumber = lessonNumber;
         this.theory = theory;

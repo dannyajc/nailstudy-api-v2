@@ -1,24 +1,28 @@
-class User {
-    firstName: String;
-    lastName: String;
-    phone: String;
-    zipCode: String;
-    address: String;
-    city: String;
-    avatar: String;
-    email: String;
+import { UserCourse } from './user_course';
+
+export class User {
+    id?: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    zipCode: string;
+    address: string;
+    city: string;
+    avatar: string;
+    email: string;
     isAdmin: boolean;
     courses?: UserCourse[];
 
-    constructor(firstName: String, lastName: String,
-        phone: String,
-        zipCode: String,
-        address: String,
-        city: String,
-        avatar: String,
-        email: String,
+    constructor(id: string, firstName: string, lastName: string,
+        phone: string,
+        zipCode: string,
+        address: string,
+        city: string,
+        avatar: string,
+        email: string,
         isAdmin: boolean = false,
         courses: UserCourse[] = []) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
@@ -30,4 +34,21 @@ class User {
         this.isAdmin = isAdmin;
         this.courses = courses;
     }
+
+    static fromData = (json: any): User => {
+        console.log(json['courses']);
+        return new User(
+            json['id'],
+            json['firstName'],
+            json['lastName'],
+            json['phone'],
+            json['zipCode'],
+            json['address'],
+            json['city'],
+            json['avatar'],
+            json['email'],
+            json['isAdmin'],
+            UserCourse.fromDataList(json['courses'])
+        );
+    };
 }
