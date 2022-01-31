@@ -6,8 +6,8 @@ import { Timestamp } from "firebase-admin/firestore";
 export class UserCourse {
     id?: string;
     courseId: string;
-    startedAt: string;
-    expiryDate: string;
+    startedAt?: string;
+    expiryDate?: string;
     currentLessonNumber: number; // if lesson number is higher than previous lesson, it means that the previous lesson (practice) has been approved
     currentSubjectNumber: number;
     finished: boolean;

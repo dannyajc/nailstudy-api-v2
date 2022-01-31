@@ -17,4 +17,13 @@ export class Course {
         this.expiryTime = expiryTime;
         this.lessons = lessons;
     }
+
+    static fromJson = (json: any) => {
+        return new Course(
+            json['name'],
+            json['description'],
+            json['image'],
+            json['expiryTime'],
+        );
+    }
 }

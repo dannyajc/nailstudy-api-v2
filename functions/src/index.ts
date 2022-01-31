@@ -209,6 +209,15 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   const newCourses = allCourses.map((course) => {
     if (course.licenseCode == licenseCode) {
       course.active = UserCourseState.active;
+      course.startedAt = new Date().toLocaleString('nl-NL', { timeZone: 'CET' });
+      console.log(course.courseId);
+      const courseJson = _getCourseById(course.courseId);
+      if (courseJson) {
+        const fullCourse = Course.fromJson(courseJson);
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + (((fullCourse) ? fullCourse.expiryTime : 5) * 7));
+        course.expiryDate = expiryDate.toLocaleString('nl-NL', { timeZone: 'CET' });
+      }
       legitCode = true;
     }
     return course;
@@ -225,6 +234,14 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   });
   if (result) { res.send(result) }
 });
+
+const _getCourseById = async (courseId) => {
+  const course = await courseDb.doc(courseId).get()
+  if (!course.exists) {
+    return null;
+  }
+  return course.data();
+};
 
 // TODO: not finished yet
 export const updateUserCourse = functions.https.onRequest(async (req, res) => {
