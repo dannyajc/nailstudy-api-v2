@@ -54,7 +54,7 @@ const checkAdmin = async (req, res) => {
 // Users
 
 export const createUser = functions.https.onRequest(async (req, res) => {
-  const newUser = new User('', req.body.name, req.body.lastName, req.body.phone, req.body.zipCode, req.body.address, req.body.city, req.body.avatar, req.body.email, req.body.isAdmin);
+  const newUser = new User('', req.body.name, req.body.lastName, req.body.phone, req.body.zipCode ?? '', req.body.address ?? '', req.body.city ?? '', req.body.avatar ?? '', req.body.email, req.body.isAdmin);
   let createdAuthUser = await getAuth().createUser({ email: newUser.email, password: req.body.password, displayName: `${newUser.firstName} ${newUser.lastName}`, emailVerified: true });
   let uid = createdAuthUser.uid;
 
@@ -110,17 +110,17 @@ export const deleteUser = functions.https.onRequest(async (req, res) => {
 
 export const getUser = functions.https.onRequest(async (req, res) => {
   // TODO: Uncomment
-  // const tokenId = req.get('Authorization').split('Bearer ')[1];
-  // getAuth().verifyIdToken(tokenId)
-  //   .then(async (decoded) => {
-  const userId = usersDb.doc(req.body.uid)
-  let user = await userId.get()
-  if (!user.exists) {
-    res.sendStatus(404);
-  }
-  let data = await user.data();
-  res.send(data)
-  //     }).catch((err) => res.status(401).send(err))
+  const tokenId = req.get('Authorization').split('Bearer ')[1];
+  getAuth().verifyIdToken(tokenId)
+    .then(async (decoded) => {
+      const userId = usersDb.doc(req.body.uid)
+      let user = await userId.get()
+      if (!user.exists) {
+        res.sendStatus(404);
+      }
+      let data = await user.data();
+      res.send(data)
+    }).catch((err) => res.status(401).send(err))
 });
 
 export const getUserByEmail = functions.https.onRequest(async (req, res) => {
