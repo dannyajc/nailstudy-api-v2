@@ -162,7 +162,14 @@ export const getAllUsers = functions.https.onRequest(async (req, res) => {
 // Courses
 
 export const createCourse = functions.https.onRequest(async (req, res) => {
-  const course = new Course(req.body.name, req.body.description, req.body.image, req.body.expiryTime);
+
+  const course = new Course(
+    req.body.name, 
+    req.body.description, 
+    req.body.image, 
+    req.body.expiryTime,
+    req.body.lessons
+  );
 
   let result = await courseDb.add(
     { ...course }
@@ -235,6 +242,17 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   if (result) { res.send(result) }
 });
 
+export const getCourseById = functions.https.onRequest(async (req, res) => {
+  const { courseId } = req.body;
+  const courseJson = await _getCourseById(courseId);
+  if (courseJson) {
+    const fullCourse = Course.fromJson(courseJson);
+    res.send(fullCourse);
+  } else {
+    res.status(404);
+  }
+});
+
 const _getCourseById = async (courseId) => {
   const course = await courseDb.doc(courseId).get()
   if (!course.exists) {
@@ -242,6 +260,19 @@ const _getCourseById = async (courseId) => {
   }
   return course.data();
 };
+
+export const getAllCourses = functions.https.onRequest(async (req, res) => {
+  let courseList = [];
+  let allCourses = await courseDb.get();
+
+  allCourses.forEach(course => {
+    console.log(course.data());
+    let data = course.data();
+    const courseModel = Course.fromJson({ id: course.id, ...data });
+    courseList.push(courseModel);
+  })
+  res.send(courseList);
+});
 
 // TODO: not finished yet
 export const updateUserCourse = functions.https.onRequest(async (req, res) => {

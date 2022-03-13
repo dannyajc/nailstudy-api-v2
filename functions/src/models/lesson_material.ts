@@ -1,4 +1,6 @@
-class LessonMaterial {
+import { Subject } from "./subject";
+
+export class LessonMaterial {
     materialType: MaterialType;
     name: string;
     description: string;
@@ -15,6 +17,16 @@ class LessonMaterial {
         this.description = description;
         this.image = image;
         this.subjects = subjects;
+    }
+
+    static fromData = (json: any): LessonMaterial => {
+        return new LessonMaterial(
+            json['materialType'],
+            json['name'],
+            json['description'],
+            json['image'],
+            Subject.fromDataList(json['subjects']),
+        );
     }
 }
 
