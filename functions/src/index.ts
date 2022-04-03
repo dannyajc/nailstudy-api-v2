@@ -109,7 +109,6 @@ export const deleteUser = functions.https.onRequest(async (req, res) => {
 });
 
 export const getUser = functions.https.onRequest(async (req, res) => {
-  // TODO: Uncomment
   const tokenId = req.get('Authorization').split('Bearer ')[1];
   getAuth().verifyIdToken(tokenId)
     .then(async (decoded) => {
@@ -118,7 +117,16 @@ export const getUser = functions.https.onRequest(async (req, res) => {
       if (!user.exists) {
         res.sendStatus(404);
       }
-      let data = await user.data();
+      let data = await User.fromData(user.data());
+      data.courses.forEach((c) => {
+        const courseExp = Date.parse(new Date(c.expiryDate).toLocaleString('nl-NL'));
+        const now = Date.parse(new Date().toLocaleString('nl-NL'));
+
+        // TODO: Also save this to the database, now it's only returned to the call that a specific course has been expired.
+        if (courseExp < now) {
+          c.active = UserCourseState.expired;
+      } 
+    })
       res.send(data)
     }).catch((err) => res.status(401).send(err))
 });
@@ -215,6 +223,9 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   var legitCode = false;
   const newCourses = allCourses.map((course) => {
     if (course.licenseCode == licenseCode) {
+      if (course.active === UserCourseState.active) {
+        res.status(404).send('LicenseCode already active');
+      }
       course.active = UserCourseState.active;
       course.startedAt = new Date().toLocaleString('nl-NL', { timeZone: 'CET' });
       console.log(course.courseId);
@@ -239,7 +250,7 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
     courses: JSON.parse(JSON.stringify(newCourses))
     // [`courses.${currentCourse.id}`]: UserCourseState.active
   });
-  if (result) { res.send(result) }
+  if (result) { res.send({result, course: newCourses.find((course) => course.licenseCode === licenseCode)}) }
 });
 
 export const getCourseById = functions.https.onRequest(async (req, res) => {
