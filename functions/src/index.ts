@@ -1,11 +1,14 @@
 import * as functions from "firebase-functions";
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { User } from './models/user';
 import { Course } from './models/course';
 import { UserCourse, UserCourseState } from './models/user_course';
 import { firestore } from "firebase-admin";
+const customParseFormat = require('dayjs/plugin/customParseFormat');
+const dayjs = require("dayjs");
+dayjs.extend(customParseFormat);
 
 const serviceAccount = require('../serviceAccountKey.json');
 
@@ -117,17 +120,26 @@ export const getUser = functions.https.onRequest(async (req, res) => {
       if (!user.exists) {
         res.sendStatus(404);
       }
+      console.log('hallo');
       let data = await User.fromData(user.data());
+      const formats = ['DD-MM-YYYY HH-mm-ss', 'D-MM-YYYY HH-mm-ss', 'DD-M-YYYY HH-mm-ss', 'D-M-YYYY HH-mm-ss'];
+
       data.courses.forEach((c) => {
-        const courseExp = Date.parse(new Date(c.expiryDate).toLocaleString('nl-NL'));
-        const now = Date.parse(new Date().toLocaleString('nl-NL'));
+        const courseExp = dayjs(c.expiryDate, formats, 'nl');
+        const now = dayjs(dayjs(), formats, 'nl')
 
         // TODO: Also save this to the database, now it's only returned to the call that a specific course has been expired.
-        if (courseExp < now) {
+        if (courseExp.isBefore(now) && c.active === 0 && !c.finished) {
+          console.log('EXPIRED');
           c.active = UserCourseState.expired;
-      } 
-    })
-      res.send(data)
+        }  
+      });
+      let result = await usersDb.doc(req.body.uid).update({
+        courses: JSON.parse(JSON.stringify(data.courses))
+      });
+      if (result) {
+        res.send(data)
+      }
     }).catch((err) => res.status(401).send(err))
 });
 
@@ -223,34 +235,31 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   var legitCode = false;
   const newCourses = allCourses.map((course) => {
     if (course.licenseCode == licenseCode) {
-      if (course.active === UserCourseState.active) {
-        res.status(404).send('LicenseCode already active');
+      if (course.active !== UserCourseState.active) {
+        course.active = UserCourseState.active;
+        course.startedAt = new Date().toLocaleString('nl-NL', { timeZone: 'CET' });
+        console.log(course.courseId);
+        const courseJson = _getCourseById(course.courseId);
+        if (courseJson) {
+          const fullCourse = Course.fromJson(courseJson);
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + (((fullCourse) ? fullCourse.expiryTime : 5) * 7));
+          course.expiryDate = expiryDate.toLocaleString('nl-NL', { timeZone: 'CET' });
+        }
+        legitCode = true;
       }
-      course.active = UserCourseState.active;
-      course.startedAt = new Date().toLocaleString('nl-NL', { timeZone: 'CET' });
-      console.log(course.courseId);
-      const courseJson = _getCourseById(course.courseId);
-      if (courseJson) {
-        const fullCourse = Course.fromJson(courseJson);
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + (((fullCourse) ? fullCourse.expiryTime : 5) * 7));
-        course.expiryDate = expiryDate.toLocaleString('nl-NL', { timeZone: 'CET' });
-      }
-      legitCode = true;
     }
     return course;
   });
   if (!legitCode) {
     res.status(404).send('LicenseCode not correct');
-  };
-
-
-  console.log(newCourses);
-  let result = await usersDb.doc(userId).update({
-    courses: JSON.parse(JSON.stringify(newCourses))
-    // [`courses.${currentCourse.id}`]: UserCourseState.active
-  });
-  if (result) { res.send({result, course: newCourses.find((course) => course.licenseCode === licenseCode)}) }
+  } else {
+    console.log(newCourses);
+    let result = await usersDb.doc(userId).update({
+      courses: JSON.parse(JSON.stringify(newCourses))
+    });
+    if (result) { res.send({result, course: newCourses.find((course) => course.licenseCode === licenseCode)}) }
+  }
 });
 
 export const getCourseById = functions.https.onRequest(async (req, res) => {
