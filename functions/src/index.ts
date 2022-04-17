@@ -210,7 +210,7 @@ export const assignCourse = functions.https.onRequest(async (req, res) => {
   };
   code = code.match(/\d{1,4}/g).join("-");
 
-  const course = new UserCourse(courseId, new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), 0, 0, false, code, UserCourseState.inactive, '');
+  const course = new UserCourse(courseId, new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), 1, 0, false, code, UserCourseState.inactive, '');
 
   const user = await usersDb.doc(userId).get();
 
