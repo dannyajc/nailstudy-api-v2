@@ -294,6 +294,53 @@ export const getAllCourses = functions.https.onRequest(async (req, res) => {
   res.send(courseList);
 });
 
+export const updateSubjectNumber = functions.https.onRequest(async (req, res) => {
+  const { courseId, userId } = req.body;
+  const user = await usersDb.doc(userId).get();
+  if (!user.exists) {
+    res.sendStatus(404);
+  }
+  var filledUser = User.fromData(user.data());
+
+  if (filledUser) {
+    const allCourses = filledUser.courses;
+    const newCourses = await Promise.all(allCourses.map(async (course) => {
+      if (course.courseId == courseId) {
+        course.currentSubjectNumber++;
+        const courseJson = await _getCourseById(courseId);
+        if (courseJson) {
+          const fullCourse = Course.fromJson(courseJson);
+          console.log('fullcourse, ', fullCourse);
+          // Go to next lessen when all subjects have been done
+          const currentLesson = fullCourse.lessons.find((lesson) => lesson.lessonNumber == course.currentLessonNumber);
+          const theorySubjects = currentLesson.theory.subjects;
+          const practiceSubjects = currentLesson.practice.subjects;
+
+          const subjectAmount = theorySubjects.length + practiceSubjects.length;
+          if (course.currentSubjectNumber > subjectAmount) {
+            if (course.currentLessonNumber == fullCourse.lessons.length) {
+              course.finished = true;
+            } else {
+              course.currentLessonNumber++;
+              course.currentSubjectNumber = 1;
+            }
+          }
+        }
+      }
+      console.log(course);
+      return course;
+    }));
+    console.log('New Courses, ', newCourses);
+    let result = await usersDb.doc(userId).update({
+      courses: JSON.parse(JSON.stringify(newCourses))
+    });
+    if (result) {
+      const updatedUser = (await usersDb.doc(userId).get()).data();
+      res.send(User.fromData(updatedUser));
+    }
+  }
+});
+
 // TODO: not finished yet
 export const updateUserCourse = functions.https.onRequest(async (req, res) => {
   const { courseId, userId } = req.body;
