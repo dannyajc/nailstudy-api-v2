@@ -17,13 +17,13 @@ export class Subject {
     }
 
     static fromDataList = (json: any): Subject[] => {
-        var subjects = json.map((element) => {
-            return new Subject(
-                element['title'],
-                element['description'],
-                element['subjectNumber'],
-                Paragraph.fromDataList(element['paragraphs']),
-            )
+        var subjects = json.map((element): Subject => {
+            return {
+                title: element['title'],
+                description: element['description'],
+                subjectNumber: element['subjectNumber'],
+                paragraphs: Paragraph.fromDataList(element['paragraphs']),
+            }
         });
         return subjects;
     }

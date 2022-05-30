@@ -23,14 +23,18 @@ export class Course {
         this.lessons = lessons;
     }
 
-    static fromJson = (json: any) => {
-        return new Course(
-            json['id'] ? json['id'] : null,
-            json['name'],
-            json['description'],
-            json['image'],
-            json['expiryTime'],
-            json['lessons'] ? Lesson.fromDataList(json['lessons']) : null
-        );
+    static fromJson = (json: any): Course => {
+        const { id, name, description, image, expiryTime = 5, lessons } = json;
+        const course = {
+            name,
+            description,
+            image,
+            expiryTime,
+            lessons: lessons ? Lesson.fromDataList(lessons) : null
+        }
+        
+        if (id) {
+            return {id, ...course}
+        } else return course;
     }
 }

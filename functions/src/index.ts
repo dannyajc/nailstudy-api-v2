@@ -6,6 +6,7 @@ import { User } from './models/user';
 import { Course } from './models/course';
 import { UserCourse, UserCourseState } from './models/user_course';
 import { firestore } from "firebase-admin";
+import { Lesson } from "./models/lesson";
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 const dayjs = require("dayjs");
 dayjs.extend(customParseFormat);
@@ -183,12 +184,8 @@ export const getAllUsers = functions.https.onRequest(async (req, res) => {
 
 export const createCourse = functions.https.onRequest(async (req, res) => {
 
-  const course = new Course(
-    req.body.name, 
-    req.body.description, 
-    req.body.image, 
-    req.body.expiryTime,
-    req.body.lessons
+  const course = Course.fromJson(
+    req.body
   );
 
   let result = await courseDb.add(

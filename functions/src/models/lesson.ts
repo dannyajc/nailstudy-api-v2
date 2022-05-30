@@ -16,14 +16,14 @@ export class Lesson {
     }
 
     static fromDataList = (json: any): Lesson[] => {
-        var lessons = json.map((element) => {
-            return new Lesson(
-                element['name'],
-                element['lessonNumber'],
-                LessonMaterial.fromData(element['theory']),
-                LessonMaterial.fromData(element['practice']),
-                element['image'],
-            )
+        var lessons = json.map((element): Lesson => {
+            return {
+                name: element['name'],
+                lessonNumber: element['lessonNumber'],
+                theory: LessonMaterial.fromData(element['theory']),
+                practice: LessonMaterial.fromData(element['practice']),
+                image: element['image'],
+            }
         });
         return lessons;
     }

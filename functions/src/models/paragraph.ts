@@ -12,12 +12,12 @@ export class Paragraph {
     }
 
     static fromDataList = (json: any): Paragraph[] => {
-        var paragraphs = json.map((element) => {
-            return new Paragraph(
-                element['title'],
-                element['description'],
-                element['images'],
-            )
+        var paragraphs = json.map((element): Paragraph => {
+            return {
+                title: element['title'],
+                description: element['description'],
+                images: element['images'],
+            }
         });
         return paragraphs;
     }

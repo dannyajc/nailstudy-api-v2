@@ -20,13 +20,13 @@ export class LessonMaterial {
     }
 
     static fromData = (json: any): LessonMaterial => {
-        return new LessonMaterial(
-            json['materialType'],
-            json['name'],
-            json['description'],
-            json['image'],
-            Subject.fromDataList(json['subjects']),
-        );
+        return {
+            materialType: json['materialType'],
+            name: json['name'],
+            description: json['description'],
+            image: json['image'],
+            subjects: Subject.fromDataList(json['subjects']),
+        };
     }
 }
 
