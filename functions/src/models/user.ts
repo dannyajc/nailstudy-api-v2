@@ -12,6 +12,7 @@ export class User {
     email: string;
     isAdmin: boolean;
     courses?: UserCourse[];
+    chats?: string[];
 
     constructor(id: string, firstName: string, lastName: string,
         phone: string,
@@ -21,7 +22,8 @@ export class User {
         avatar: string,
         email: string,
         isAdmin: boolean = false,
-        courses: UserCourse[] = []) {
+        courses: UserCourse[] = [],
+        chats: string[] = []) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -33,6 +35,7 @@ export class User {
         this.email = email;
         this.isAdmin = isAdmin;
         this.courses = courses;
+        this.chats = chats;
     }
 
     static fromData = (json: any): User => {
@@ -48,7 +51,8 @@ export class User {
             json['avatar'],
             json['email'],
             json['isAdmin'],
-            UserCourse.fromDataList(json['courses'])
+            UserCourse.fromDataList(json['courses']),
+            json['chats'],
         );
     };
 }

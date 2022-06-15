@@ -6,7 +6,8 @@ import { User } from './models/user';
 import { Course } from './models/course';
 import { UserCourse, UserCourseState } from './models/user_course';
 import { firestore } from "firebase-admin";
-import { Lesson } from "./models/lesson";
+import { v4 as uuidv4 } from 'uuid';
+
 const customParseFormat = require('dayjs/plugin/customParseFormat');
 const dayjs = require("dayjs");
 dayjs.extend(customParseFormat);
@@ -142,6 +143,22 @@ export const getUser = functions.https.onRequest(async (req, res) => {
         res.send(data)
       }
     }).catch((err) => res.status(401).send(err))
+});
+
+export const getUserById = functions.https.onRequest(async (req, res) => {
+  // TODO: Uncomment
+  // const tokenId = req.get('Authorization').split('Bearer ')[1];
+  // getAuth().verifyIdToken(tokenId)
+  //   .then(async (decoded) => {
+  const userId = usersDb.doc(req.body.userId)
+  let user = await userId.get()
+  if (!user.exists) {
+    res.sendStatus(404);
+  }
+
+  res.send(User.fromData(user.data()));
+  // })
+  // .catch((err) => res.status(401).send(err));
 });
 
 export const getUserByEmail = functions.https.onRequest(async (req, res) => {
@@ -394,10 +411,41 @@ export const approveLesson = functions.https.onRequest(async (req, res) => {
   }
 });
 
+export const newChat = functions.https.onRequest(async (req, res) => {
+  const { userId, receiverId } = req.body;
+  const newChatId = uuidv4();
+  
+  const user = await usersDb.doc(userId).get();
+  if (!user.exists) {
+    res.sendStatus(404);
+  }
+  var filledUser = User.fromData(user.data());
+
+  const receiver = await usersDb.doc(receiverId).get();
+  if (!user.exists) {
+    res.sendStatus(404);
+  }
+  var receivingUser = User.fromData(receiver.data());
+
+  if (filledUser && receivingUser) {
+    let updateOne = await usersDb.doc(userId).update({
+      chats: [...filledUser.chats, newChatId]
+    });
+
+    let updateTwo = await usersDb.doc(receiverId).update({
+      chats: [...receivingUser.chats, newChatId]
+    });
+
+    if (updateOne && updateTwo) {
+      res.send(newChatId);
+    }
+  }
+});
+
 
 // TODO: not finished yet
 export const updateUserCourse = functions.https.onRequest(async (req, res) => {
-  const { courseId, userId } = req.body;
+  const { userId } = req.body;
   const user = await usersDb.doc(userId).get();
   if (!user.exists) {
     res.sendStatus(404);
