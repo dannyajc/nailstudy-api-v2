@@ -413,7 +413,6 @@ export const approveLesson = functions.https.onRequest(async (req, res) => {
 
 export const newChat = functions.https.onRequest(async (req, res) => {
   const { userId, receiverId } = req.body;
-  const newChatId = uuidv4();
   
   const user = await usersDb.doc(userId).get();
   if (!user.exists) {
@@ -428,16 +427,24 @@ export const newChat = functions.https.onRequest(async (req, res) => {
   var receivingUser = User.fromData(receiver.data());
 
   if (filledUser && receivingUser) {
-    let updateOne = await usersDb.doc(userId).update({
-      chats: [...filledUser.chats, newChatId]
-    });
+    // Sending because it does exist already
+    const intersectingChatIds = filledUser.chats.filter(id => receivingUser.chats.includes(id));
+    if (intersectingChatIds.length !== 0) {
+      res.send(intersectingChatIds[0]);
+    } else {
+    // Adding because it doesn't exist yet
+      const newChatId = uuidv4();
+      let updateOne = await usersDb.doc(userId).update({
+        chats: [...filledUser.chats, newChatId]
+      });
 
-    let updateTwo = await usersDb.doc(receiverId).update({
-      chats: [...receivingUser.chats, newChatId]
-    });
+      let updateTwo = await usersDb.doc(receiverId).update({
+        chats: [...receivingUser.chats, newChatId]
+      });
 
-    if (updateOne && updateTwo) {
-      res.send(newChatId);
+      if (updateOne && updateTwo) {
+        res.send(newChatId);
+      }
     }
   }
 });
