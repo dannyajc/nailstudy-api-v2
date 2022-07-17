@@ -1,8 +1,6 @@
 // Currently following course
 // Contains all status information
 
-import { Timestamp } from "firebase-admin/firestore";
-
 export class UserCourse {
     id?: string;
     courseId: string;
@@ -14,7 +12,7 @@ export class UserCourse {
     licenseCode: string;
     // becomes active when licensecode has been validated
     active: UserCourseState;
-    // TODO; chat
+    pendingApproval: boolean;
 
     constructor(courseId: string,
         startedAt: string,
@@ -23,7 +21,9 @@ export class UserCourse {
         currentSubjectNumber: number,
         finished: boolean = false,
         licenseCode: string,
-        active: UserCourseState = UserCourseState.inactive, id?: string) {
+        active: UserCourseState = UserCourseState.inactive, 
+        id?: string,
+        pendingApproval?: boolean) {
         this.courseId = courseId;
         this.startedAt = startedAt;
         this.expiryDate = expiryDate;
@@ -33,6 +33,7 @@ export class UserCourse {
         this.licenseCode = licenseCode;
         this.active = active;
         this.id = id;
+        this.pendingApproval = pendingApproval;
     }
 
     static fromDataList = (json: any): UserCourse[] => {
@@ -46,7 +47,8 @@ export class UserCourse {
                 element['finished'],
                 element['licenseCode'],
                 element['active'],
-                index
+                index,
+                element['pendingApproval'],
             )
         });
         return courses;

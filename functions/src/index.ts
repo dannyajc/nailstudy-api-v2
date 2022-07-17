@@ -465,3 +465,28 @@ export const updateUserCourse = functions.https.onRequest(async (req, res) => {
   if (filledUser) { res.send(filledUser) }
 });
 
+export const newPendingApproval = functions.https.onRequest(async (req, res) => {
+  const { courseId, userId } = req.body;
+  const user = await usersDb.doc(userId).get();
+  if (!user.exists) {
+    res.sendStatus(404);
+  }
+  var filledUser = User.fromData(user.data());
+
+  if (filledUser) {
+    const allCourses = filledUser.courses;
+    const newCourses = await Promise.all(allCourses.map(async (course) => {
+      if (course.courseId == courseId) {
+        course.pendingApproval = true;
+      }
+      return course;
+    }));
+    let result = await usersDb.doc(userId).update({
+      courses: JSON.parse(JSON.stringify(newCourses))
+    });
+    if (result) {
+      const updatedUser = (await usersDb.doc(userId).get()).data();
+      res.send(User.fromData(updatedUser));
+    }
+  }
+});
