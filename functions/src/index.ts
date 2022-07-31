@@ -395,9 +395,19 @@ export const approveLesson = functions.https.onRequest(async (req, res) => {
   if (filledUser) {
     const allCourses = filledUser.courses;
     const newCourses = await Promise.all(allCourses.map(async (course) => {
-      if (course.courseId == courseId) {
-        course.currentLessonNumber++;
-        course.currentSubjectNumber = 1;
+      if (course.courseId == courseId && course.pendingApproval == true) {
+        const courseJson = await _getCourseById(courseId);
+        if (courseJson) {
+          const fullCourse = Course.fromJson(courseJson);
+          if (course.currentLessonNumber == fullCourse.lessons.length) {
+            course.finished = true;
+            course.pendingApproval = false;
+          } else {
+            course.currentLessonNumber++;
+            course.currentSubjectNumber = 1;
+            course.pendingApproval = false;
+          }
+        }
       }
       return course;
     }));
