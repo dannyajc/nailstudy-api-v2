@@ -32,7 +32,6 @@ const isAdmin = async (req, res) => {
   const tokenId = req.get('Authorization').split('Bearer ')[1];
   getAuth().verifyIdToken(tokenId)
     .then(async (decoded) => {
-      console.log("ISSUER", req.body.issuingUid)
       let issuingUser = await usersDb.doc(req.body.issuingUid || "0").get();
       if (!issuingUser.exists) {
         res.send('Not a valid issuer');
@@ -122,7 +121,6 @@ export const getUser = functions.https.onRequest(async (req, res) => {
       if (!user.exists) {
         res.sendStatus(404);
       }
-      console.log('hallo');
       let data = await User.fromData(user.data());
       const formats = ['DD-MM-YYYY HH-mm-ss', 'D-MM-YYYY HH-mm-ss', 'DD-M-YYYY HH-mm-ss', 'D-M-YYYY HH-mm-ss'];
 
@@ -132,7 +130,6 @@ export const getUser = functions.https.onRequest(async (req, res) => {
 
         // TODO: Also save this to the database, now it's only returned to the call that a specific course has been expired.
         if (courseExp.isBefore(now) && c.active === 0 && !c.finished) {
-          console.log('EXPIRED');
           c.active = UserCourseState.expired;
         }  
       });
@@ -252,7 +249,6 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
       if (course.active !== UserCourseState.active) {
         course.active = UserCourseState.active;
         course.startedAt = new Date().toLocaleString('nl-NL', { timeZone: 'CET' });
-        console.log(course.courseId);
         const courseJson = _getCourseById(course.courseId);
         if (courseJson) {
           const fullCourse = Course.fromJson(courseJson);
@@ -268,7 +264,6 @@ export const activateUserCourse = functions.https.onRequest(async (req, res) => 
   if (!legitCode) {
     res.status(404).send('LicenseCode not correct');
   } else {
-    console.log(newCourses);
     let result = await usersDb.doc(userId).update({
       courses: JSON.parse(JSON.stringify(newCourses))
     });
@@ -300,7 +295,6 @@ export const getAllCourses = functions.https.onRequest(async (req, res) => {
   let allCourses = await courseDb.get();
 
   allCourses.forEach(course => {
-    console.log(course.data());
     let data = course.data();
     const courseModel = Course.fromJson({ id: course.id, ...data });
     courseList.push(courseModel);
@@ -324,7 +318,6 @@ export const updateSubjectNumber = functions.https.onRequest(async (req, res) =>
         const courseJson = await _getCourseById(courseId);
         if (courseJson) {
           const fullCourse = Course.fromJson(courseJson);
-          console.log('fullcourse, ', fullCourse);
           // Go to next lessen when all subjects have been done
           const currentLesson = fullCourse.lessons.find((lesson) => lesson.lessonNumber == course.currentLessonNumber);
           const theorySubjects = currentLesson.theory.subjects;
@@ -332,7 +325,6 @@ export const updateSubjectNumber = functions.https.onRequest(async (req, res) =>
 
           const subjectAmount = theorySubjects.length + practiceSubjects.length;
           if (course.currentSubjectNumber > subjectAmount) {
-            console.log('bla');
             if (course.currentLessonNumber == fullCourse.lessons.length) {
               course.finished = true;
             } else {
@@ -343,10 +335,8 @@ export const updateSubjectNumber = functions.https.onRequest(async (req, res) =>
           }
         }
       }
-      console.log(course);
       return course;
     }));
-    console.log('New Courses, ', newCourses);
     let result = await usersDb.doc(userId).update({
       courses: JSON.parse(JSON.stringify(newCourses))
     });
@@ -373,7 +363,6 @@ export const finishLesson = functions.https.onRequest(async (req, res) => {
       }
       return course;
     }));
-    console.log('New Courses, ', newCourses);
     let result = await usersDb.doc(userId).update({
       courses: JSON.parse(JSON.stringify(newCourses))
     });
