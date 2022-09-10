@@ -80,7 +80,7 @@ export const modifyUser = functions.https.onRequest(async (req, res) => {
   let usableUser = user.data();
 
   let newInfo = {
-    name: req.body.firstName || usableUser.firstName,
+    firstName: req.body.firstName || usableUser.firstName,
     lastName: req.body.lastName || usableUser.lastName,
     email: req.body.email || usableUser.email,
     address: req.body.address || usableUser.address,
