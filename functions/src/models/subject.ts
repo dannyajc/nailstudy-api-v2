@@ -5,15 +5,18 @@ export class Subject {
     description: string;
     subjectNumber: number;
     paragraphs: Paragraph[];
+    image?: string;
 
     constructor(title: string,
         description: string,
         subjectNumber: number,
-        paragraphs: Paragraph[]) {
+        paragraphs: Paragraph[],
+        image: string) {
         this.title = title;
         this.description = description;
         this.subjectNumber = subjectNumber;
         this.paragraphs = paragraphs;
+        this.image = image;
     }
 
     static fromDataList = (json: any): Subject[] => {
@@ -23,6 +26,7 @@ export class Subject {
                 description: element['description'],
                 subjectNumber: element['subjectNumber'],
                 paragraphs: Paragraph.fromDataList(element['paragraphs']),
+                image: element['image'],
             }
         });
         return subjects;
