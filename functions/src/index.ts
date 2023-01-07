@@ -218,6 +218,16 @@ export const createCourse = functions.https.onRequest(async (req, res) => {
   if (result) { res.send({ id: result.id, ...course }) }
 });
 
+export const exportDatabaseToJson = functions.https.onRequest(async (req, res) => {
+  const courseId = req.query.courseId.toString();
+
+  let courseRef = courseDb.doc(courseId);
+  let course = await courseRef.get();
+  let courseData = course.data();
+
+  res.send(courseData);
+});
+
 // User Courses
 
 export const assignCourse = functions.https.onRequest(async (req, res) => {
@@ -232,7 +242,7 @@ export const assignCourse = functions.https.onRequest(async (req, res) => {
   };
   code = code.match(/\d{1,4}/g).join("-");
 
-  const course = new UserCourse(courseId, new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), 1, 0, false, code, UserCourseState.inactive, '');
+  const course = new UserCourse(courseId, new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), new Date().toLocaleString('nl-NL', { timeZone: 'CET' }), 1, 0, false, code, UserCourseState.inactive, '', false);
 
   const user = await usersDb.doc(userId).get();
 

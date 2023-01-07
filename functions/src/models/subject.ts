@@ -26,7 +26,7 @@ export class Subject {
                 description: element['description'],
                 subjectNumber: element['subjectNumber'],
                 paragraphs: Paragraph.fromDataList(element['paragraphs']),
-                image: element['image'],
+                image: element['image'] ?? "",
             }
         });
         return subjects;
